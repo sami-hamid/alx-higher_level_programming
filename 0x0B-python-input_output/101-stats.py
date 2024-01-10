@@ -1,59 +1,48 @@
-#!/usr/bin/python3
- """Reads from standard input and computes metrics.
+#!/bin/bash/python3
+import json
 
- After every ten lines or the input of a keyboard interruption (CTRL + C),
- prints the following statistics:
-    - Total file size up to that point.
-    - Count of read status codes up to that point.
- """
-
-
- def print_stats(size, status_codes):
-    """Print accumulated metrics.
-
-    Args:
-        size (int): The accumulated read file size.
-        status_codes (dict): The accumulated count of status codes.
-    """
-    print("File size: {}".format(size))
-    for key in sorted(status_codes):
-        print("{}: {}".format(key, status_codes[key]))
-
-
- if __name__ == "__main__":
-    import sys
-
-    size = 0
-    status_codes = {}
-    valid_codes = ['200', '301', '400', '401', '403', '404', '405', '500']
-    count = 0
-
+def read_file(file_name):
     try:
-        for line in sys.stdin:
-            if count == 10:
-                print_stats(size, status_codes)
-                count = 1
-            else:
-                count += 1
+        with open(file_name, 'r') as file:
+            content = file.read()
+            return content
+    except Exception as e:
+        print("An error occurred:", str(e))
+        return None
 
-            line = line.split()
+def from_json_string(json_string):
+    try:
+        python_object = json.loads(json_string)
+        return python_object
+    except Exception as e:
+        print("An error occurred:", str(e))
+        return None
 
-            try:
-                size += int(line[-1])
-            except (IndexError, ValueError):
-                pass
+def calculate_stats(data):
+    total = len(data)
+    avg = sum(data) / total
+    max_value = max(data)
+    min_value = min(data)
 
-            try:
-                if line[-2] in valid_codes:
-                    if status_codes.get(line[-2], -1) == -1:
-                        status_codes[line[-2]] = 1
-                    else:
-                        status_codes[line[-2]] += 1
-            except IndexError:
-                pass
+    return {
+        "total": total,
+        "avg": avg,
+        "max": max_value,
+        "min": min_value
+    }
 
-        print_stats(size, status_codes)
+file_name = input("Enter the name of the file you want to read: ")
+json_string = read_file(file_name)
 
-    except KeyboardInterrupt:
-        print_stats(size, status_codes)
-        raise
+if json_string:
+    python_object = from_json_string(json_string)
+    if python_object:
+        if isinstance(python_object, list):
+            stats = calculate_stats(python_object)
+            print("The stats of the file content are:", stats)
+        else:
+            print("The content of the file is not a list.")
+    else:
+        print("Converting the JSON string to a Python object failed.")
+else:
+    print("Reading the file failed.")

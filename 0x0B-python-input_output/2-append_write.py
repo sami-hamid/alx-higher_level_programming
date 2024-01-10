@@ -1,15 +1,27 @@
-#!/usr/bin/python3
-"""Defines a file-appending function"""
+#!/bin/bash/python3
+def write_file(file_name, content):
+    try:
+        with open(file_name, 'w') as file:
+            file.write(content)
+            print("File written successfully.")
+    except Exception as e:
+        print("An error occurred:", str(e))
 
+def append_write(file_name, content):
+    try:
+        with open(file_name, 'a') as file:
+            file.write(content)
+            print("Content appended to the file successfully.")
+    except Exception as e:
+        print("An error occurred:", str(e))
 
-def append_write(filename="", text=""):
-    """Appends a string to the end of a UTF8 text file
+file_name = input("Enter the name of the file you want to write: ")
+content = input("Enter the content you want to write to the file: ")
+write_or_append = input("Choose 'write' or 'append': ")
 
-    Args:
-        filename (str): The name of the file to append to
-        text (str): The string to append to the file
-    Returns:
-        The number of characters appended
-    """
-    with open(filename, "a", encoding="utf-8") as f:
-        return f.write(text)
+if write_or_append.lower() == 'write':
+    write_file(file_name, content)
+elif write_or_append.lower() == 'append':
+    append_write(file_name, content)
+else:
+    print("Invalid input.")
